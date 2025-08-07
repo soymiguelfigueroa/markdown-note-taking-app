@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\MarkdownNote;
+use Illuminate\Support\Str;
 
 class MarkdownNoteController extends Controller
 {
@@ -11,16 +12,17 @@ class MarkdownNoteController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'content' => 'required|file|mimetypes:text/markdown|max:2048',
+            'content' => 'required|file|extensions:md|max:2048',
         ]);
-        dd($validated);
+
         $note = new MarkdownNote();
         $note->title = $validated['title'];
         $note->user_id = $request->user()->id;
 
         if ($note->save()) {
+            $filename = $note->user_id . '-' . $note->id . '-' . Str::slug($note->title, '-');
             $file = $validated['content'];
-            $path = $file->store('notes');
+            $path = $file->storeAs('notes', $filename . '.md');
             $note->content = $path;
             $note->update();
 
