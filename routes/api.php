@@ -11,4 +11,5 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::get('/user', function (Request $request) {return $request->user();});
     Route::post('/notes', [MarkdownNoteController::class, 'store'])->name('note.store');
     Route::get('/notes', [MarkdownNoteController::class, 'index'])->name('note.index');
+    Route::get('/notes/{note}', [MarkdownNoteController::class, 'show'])->name('note.show');
 });

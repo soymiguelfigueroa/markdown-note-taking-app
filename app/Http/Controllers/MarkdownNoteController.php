@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\MarkdownNote;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class MarkdownNoteController extends Controller
@@ -37,5 +38,14 @@ class MarkdownNoteController extends Controller
         $notes = $request->user()->markdownNotes()->get();
         
         return response()->json($notes, 200);
+    }
+
+    public function show(MarkdownNote $note)
+    {
+        $file_content = Storage::get($note->content);
+        $html = Str::of($file_content)->markdown();
+        $note->html = $html;
+
+        return response()->json($note, 200);
     }
 }
