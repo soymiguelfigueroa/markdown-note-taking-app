@@ -9,5 +9,6 @@ Route::post('/register', [AuthController::class, 'register']);
 
 Route::middleware(['auth:sanctum'])->group(function(){
     Route::get('/user', function (Request $request) {return $request->user();});
-    Route::post('/note', [MarkdownNoteController::class, 'store'])->name('note.store');
+    Route::post('/notes', [MarkdownNoteController::class, 'store'])->name('note.store');
+    Route::get('/notes', [MarkdownNoteController::class, 'index'])->name('note.index');
 });

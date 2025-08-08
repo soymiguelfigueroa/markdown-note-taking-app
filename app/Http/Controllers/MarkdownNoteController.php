@@ -31,4 +31,11 @@ class MarkdownNoteController extends Controller
             return response()->json(['message' => 'Failed to create note'], 500);
         }
     }
+
+    public function index(Request $request)
+    {
+        $notes = $request->user()->markdownNotes()->get();
+        
+        return response()->json($notes, 200);
+    }
 }
