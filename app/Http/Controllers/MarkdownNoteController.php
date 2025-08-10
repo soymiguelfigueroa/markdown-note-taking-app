@@ -6,6 +6,10 @@ use Illuminate\Http\Request;
 use App\Models\MarkdownNote;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use PhpSpellcheck\MisspellingFinder;
+use App\MisspellingHandler\VoidHandler;
+use PhpSpellcheck\Spellchecker\Aspell;
+use PhpSpellcheck\TextProcessor\MarkdownRemover;
 
 class MarkdownNoteController extends Controller
 {
@@ -47,5 +51,32 @@ class MarkdownNoteController extends Controller
         $note->html = $html;
 
         return response()->json($note, 200);
+    }
+
+    public function check(MarkdownNote $note)
+    {
+        $misspellingFinder = new MisspellingFinder(
+            Aspell::create(), // Creates aspell spellchecker pointing to "aspell" as it's binary path
+            new VoidHandler(),
+            new MarkdownRemover()
+        );
+
+        $mdFormattedString = Storage::get($note->content);
+
+        $misspellings = $misspellingFinder->find($mdFormattedString, ['en_US']);
+
+        $result = [];
+
+        foreach ($misspellings as $misspelling) {
+            $result[] = [
+                'word' => $misspelling->getWord(),
+                'line' => $misspelling->getLineNumber(),
+                'offset' => $misspelling->getOffset(),
+                'suggestions' => $misspelling->getSuggestions(),
+                'context' => \PhpSpellcheck\json_encode($misspelling->getContext())
+            ];
+        }
+
+        return response()->json($result, 200);
     }
 }
